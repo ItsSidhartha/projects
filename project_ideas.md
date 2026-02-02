@@ -1,4 +1,4 @@
-##Project Ideas
+## Project Ideas
 
 1. Hang man,
 2. Rock Paper sizzers,
