@@ -9,8 +9,8 @@ export const moveCursor = async (x, y) => {
   await write(esc);
 };
 
-export const display = async (puzzle) => {
-  await moveCursor(0, 0 );
+export const display = async (puzzle, chances) => {
+  await moveCursor(0, 0);
   const uperWali = "-".repeat(41);
   let screen = `${uperWali}\n|`;
 
@@ -28,4 +28,5 @@ export const display = async (puzzle) => {
 
   // screen += uperWali;
   console.log(screen);
+  console.log("Lifes: ",chances);
 };

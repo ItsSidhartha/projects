@@ -1,4 +1,3 @@
-const decoder = new TextDecoder();
 const encoder = new TextEncoder();
 
 export const enableMouse = async () => {
