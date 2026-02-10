@@ -19,10 +19,10 @@ export const display = async (puzzle, chances) => {
 
   for (let row = 0; row < 9; row++) {
     for (let colm = 0; colm < 9; colm++) {
-      if((colm) % 3 === 0){
-        screen += "┃"
-      }else{
-        screen += "│" //
+      if (colm % 3 === 0) {
+        screen += "┃";
+      } else {
+        screen += "│"; //
       }
       screen += ` ${puzzle[row][colm]} `;
     }
@@ -32,9 +32,7 @@ export const display = async (puzzle, chances) => {
   }
 
   screen += "┃\n" + bottom;
-
-  // screen += uperWali;
   console.log(screen);
-  console.log("Lifes: ", chances);
+  console.log("Lifes: ", "❤️".repeat(chances) + "🩶".repeat(5 - chances));
 };
-// 
+//

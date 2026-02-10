@@ -4,7 +4,7 @@ import { stripAnsiCode } from "@std/fmt/colors";
 
 const decoder = new TextDecoder();
 
-const validate = ([y, x], value, solvedPuzzle) => {
+const validate = ({ y, x }, value, solvedPuzzle) => {
   return solvedPuzzle[y][x] === +value;
 };
 
@@ -25,35 +25,20 @@ const parseChunk = (chunk) => {
   return { isMouse: false, isValue: false };
 };
 
-const MAP = {
-  0: 0,
-  1: 0,
-  2: 1,
-  3: 2,
-  4: 3,
-  5: 3,
-  6: 4,
-  7: 5,
-  8: 5,
-  9: 6,
-  10: 7,
-  11: 7,
-  12: 8,
+const getPosition = async (mouseX, mouseY, cursor, preFills) => {
+  const y = Math.floor(mouseY / 2) - 1; //Math.floor((+mouseY / 2) - 1);
+  const x = Math.floor((mouseX - 1) / 4);
+  if (y > 8 || x > 8 || preFills.includes(`${y}-${x}`)) return cursor;
+  await moveCursor(mouseX, mouseY);
+  return { y, x };
 };
 
-const getPosition = (mouseX, mouseY, cursor) => {
-  const y = Math.floor((+mouseY / 2) - 1);
-  const x = MAP[Math.floor((+mouseX - 2) / 3)];
-  if (y > 8 || x > 8) return cursor;
-  return [y, x];
-};
-
-export const game = async (puzzle, solvedPuzzle) => {
+export const game = async (puzzle, solvedPuzzle, preFills) => {
   let chances = 5;
   const buffer = new Uint8Array(100);
   console.clear();
 
-  let cursor = [0, 0];
+  let cursor = { x: 0, y: 0 };
   display(puzzle, chances);
 
   while (chances > 0) {
@@ -61,23 +46,24 @@ export const game = async (puzzle, solvedPuzzle) => {
     const { isMouse, mouseX, mouseY, isValue, value } = parseChunk(
       buffer.slice(0, n),
     );
+
     if (isMouse) {
-      cursor = getPosition(mouseX, mouseY, cursor);
-      await moveCursor(mouseX, mouseY);
+      cursor = await getPosition(mouseX, mouseY, cursor, preFills);
       continue;
     }
 
-    if (isValue) {
+    if (isValue && cursor) {
       const isValid = validate(cursor, value, solvedPuzzle);
       if (isValid) {
-        puzzle[cursor[0]][cursor[1]] = "\x1b[32m" + value + "\x1b[0m";
+        puzzle[cursor.y][cursor.x] = "\x1b[32m" + value + "\x1b[0m";
       } else {
-        puzzle[cursor[0]][cursor[1]] = "\x1b[31m" + value + "\x1b[0m";
+        puzzle[cursor.y][cursor.x] = "\x1b[31m" + value + "\x1b[0m";
         chances--;
       }
 
       console.clear();
       display(puzzle, chances);
+      cursor = null;
     }
 
     if (
@@ -89,7 +75,7 @@ export const game = async (puzzle, solvedPuzzle) => {
     }
   }
 
-  await avengersEndGame(puzzle, chances, "HAR GYA BHAI");
+  await avengersEndGame(solvedPuzzle, chances, "HAR GYA BHAI");
 };
 
 const avengersEndGame = async (puzzle, chances, msg) => {
