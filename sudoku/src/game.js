@@ -43,16 +43,16 @@ const isPuzzleComplete = (puzzle, solvedPuzzle) => {
   return plainPuzzle.toString() === solvedPuzzle.toString();
 };
 
-const writeToPuzzle = (puzzle, cursor, colorCode) => {
+const writeToPuzzle = (puzzle, cursor, colorCode, value) => {
   puzzle[cursor.y][cursor.x] = colorCode + value + "\x1b[0m";
 };
 
 const handleValue = (puzzle, solvedPuzzle, cursor, value, chances) => {
   const isValid = validate(cursor, value, solvedPuzzle);
   if (isValid) {
-    writeToPuzzle(puzzle, cursor, "\x1b[32m");
+    writeToPuzzle(puzzle, cursor, "\x1b[32m", value);
   } else {
-    writeToPuzzle(puzzle, cursor, "\x1b[31m");
+    writeToPuzzle(puzzle, cursor, "\x1b[31m", value);
     chances--;
   }
 
