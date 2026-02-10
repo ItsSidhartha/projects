@@ -1,6 +1,18 @@
-export const display = (puzzle) => {
+const encoder = new TextEncoder();
+
+const write = async (input) => {
+  await Deno.stdout.write(encoder.encode(input));
+};
+
+export const moveCursor = async (x, y) => {
+  const esc = `\x1b[${y};${x}H`;
+  await write(esc);
+};
+
+export const display = async (puzzle) => {
+  await moveCursor(0, 0 );
   const uperWali = "-".repeat(41);
-  let screen = `\n\n${uperWali}\n|`;
+  let screen = `${uperWali}\n|`;
 
   for (let row = 0; row < 9; row++) {
     for (let colm = 0; colm < 9; colm++) {
@@ -17,5 +29,3 @@ export const display = (puzzle) => {
   // screen += uperWali;
   console.log(screen);
 };
-
-
