@@ -11,22 +11,30 @@ export const moveCursor = async (x, y) => {
 
 export const display = async (puzzle, chances) => {
   await moveCursor(0, 0);
-  const uperWali = "-".repeat(41);
-  let screen = `${uperWali}\n|`;
+  const horizontal = "┠━━━┿━━━┿━━━╋━━━┿━━━┿━━━╋━━━┿━━━┿━━━┨";
+  const top = "┏━━━┯━━━┯━━━┳━━━┯━━━┯━━━┳━━━┯━━━┯━━━┓";
+  const middle = "┠───┼───┼───╋───┼───┼───╋───┼───┼───┨";
+  const bottom = "┗━━━┷━━━┷━━━┻━━━┷━━━┷━━━┻━━━┷━━━┷━━━┛";
+  let screen = `${top}\n`;
 
   for (let row = 0; row < 9; row++) {
     for (let colm = 0; colm < 9; colm++) {
-      screen += `| ${puzzle[row][colm]} `;
-      if ((colm + 1) % 3 === 0) {
-        screen += "|";
+      if((colm) % 3 === 0){
+        screen += "┃"
+      }else{
+        screen += "│" //
       }
+      screen += ` ${puzzle[row][colm]} `;
     }
-    if ((row + 1) % 3 === 0) {
-      screen += "|\n" + "=".repeat(40) + "\n|";
-    } else screen += `|\n${uperWali}\n|`;
+    if ((row + 1) % 3 === 0 && row !== 8) {
+      screen += "┃\n" + horizontal + "\n";
+    } else if (row !== 8) screen += `┃\n${middle}\n`;
   }
+
+  screen += "┃\n" + bottom;
 
   // screen += uperWali;
   console.log(screen);
-  console.log("Lifes: ",chances);
+  console.log("Lifes: ", chances);
 };
+// 
