@@ -1,104 +1,108 @@
-import { display, moveCursor } from "./display.js";
+import { moveCursor, write } from "./helpers.js";
 import { disableMouse } from "./setup.js";
 import { stripAnsiCode } from "@std/fmt/colors";
 
-const decoder = new TextDecoder();
-
-const validate = ({ y, x }, value, solvedPuzzle) => {
-  return solvedPuzzle[y][x] === +value;
-};
-
-const parseChunk = (chunk) => {
-  const data = decoder.decode(chunk);
-  const matched = data.match(/\x1b\[<(\d+);(\d+);(\d+)([mM])/);
-  if (!matched) {
-    const value = +(data.trim());
-    if (!Number(value)) {
-      return { isValue: false, isMouse: false };
-    }
-    return { isValue: true, isMouse: false, value };
-  }
-  const [, btn, mouseX, mouseY, type] = matched;
-  if (btn === "0" && type === "M") {
-    return { isMouse: true, btn, mouseX, mouseY, type, isValue: false };
-  }
-  return { isMouse: false, isValue: false };
-};
-
-const getPosition = async (mouseX, mouseY, cursor, preFills) => {
-  const y = Math.floor(mouseY / 2) - 1;
-  const x = Math.floor((mouseX - 1) / 4);
-  const isInvalidPosition = y > 8 || x > 8 || preFills.includes(`${y}-${x}`);
-
-  if (isInvalidPosition) return cursor;
-  await moveCursor(mouseX, mouseY);
-  return { y, x };
-};
-
-const isPuzzleComplete = (puzzle, solvedPuzzle) => {
-  const plainPuzzle = puzzle.map((row) =>
-    row.map((cell) => stripAnsiCode(cell))
-  );
-
-  return plainPuzzle.toString() === solvedPuzzle.toString();
-};
-
-const writeToPuzzle = (puzzle, cursor, colorCode, value) => {
-  puzzle[cursor.y][cursor.x] = colorCode + value + "\x1b[0m";
-};
-
-const handleValue = (puzzle, solvedPuzzle, cursor, value, chances) => {
-  const isValid = validate(cursor, value, solvedPuzzle);
-  if (isValid) {
-    writeToPuzzle(puzzle, cursor, "\x1b[32m", value);
-  } else {
-    writeToPuzzle(puzzle, cursor, "\x1b[31m", value);
-    chances--;
+export class Game {
+  constructor(puzzle, solvedPuzzle, preFills) {
+    this.puzzle = puzzle;
+    this.solvedPuzzle = solvedPuzzle;
+    this.approvedCells = new Set(preFills);
+    this.cursor = null;
+    this.life = 5;
   }
 
-  console.clear();
-  display(puzzle, chances);
-  cursor = null;
-};
+  #isValid(value) {
+    return this.solvedPuzzle[this.cursor.y][this.cursor.x] === value;
+  }
 
-const readInput = async () => {
-  const buffer = new Uint8Array(100);
-  const n = await Deno.stdin.read(buffer);
-  return parseChunk(buffer.slice(0, n));
-};
+  #writeToPuzzle(colorCode, value) {
+    this.puzzle[this.cursor.y][this.cursor.x] = colorCode + value + "\x1b[0m";
+  }
 
-const avengersEndGame = async (puzzle, chances, msg) => {
-  await moveCursor(0, 0);
-  console.clear();
-  await display(puzzle, chances);
-  console.log(msg);
-  await disableMouse();
-};
+  #horizontal = "┠━━━┿━━━┿━━━╋━━━┿━━━┿━━━╋━━━┿━━━┿━━━┨";
+  #top = "┏━━━┯━━━┯━━━┳━━━┯━━━┯━━━┳━━━┯━━━┯━━━┓";
+  #middle = "┠───┼───┼───╋───┼───┼───╋───┼───┼───┨";
+  #bottom = "┗━━━┷━━━┷━━━┻━━━┷━━━┷━━━┻━━━┷━━━┷━━━┛";
 
-export const play = async (puzzle, solvedPuzzle, preFills) => {
-  let chances = 5;
-  console.clear();
+  #createScreen() {
+    let screen = `${this.#top}\n`;
 
-  let cursor = { x: 0, y: 0 };
-  display(puzzle, chances);
+    for (let row = 0; row < 9; row++) {
+      for (let colm = 0; colm < 9; colm++) {
+        if (colm % 3 === 0) screen += "┃";
+        else screen += "│";
+        screen += ` ${this.puzzle[row][colm]} `;
+      }
 
-  while (chances > 0) {
-    const { isMouse, isValue, mouseX, mouseY, value } = await readInput();
-
-    if (isMouse) {
-      cursor = await getPosition(mouseX, mouseY, cursor, preFills);
-      continue;
+      if ((row + 1) % 3 === 0 && row !== 8) {
+        screen += "┃\n" + this.#horizontal + "\n";
+      } else if (row !== 8) screen += `┃\n${this.#middle}\n`;
     }
 
-    if (isValue && cursor) {
-      handleValue(puzzle, solvedPuzzle, cursor, value, chances);
-    }
+    return screen + "┃\n" + this.#bottom;
+  }
 
-    if (isPuzzleComplete(puzzle, solvedPuzzle)) {
-      await avengersEndGame(puzzle, chances, "JEET GYA BHAI");
-      return;
+  async display() {
+    await moveCursor(0, 0);
+    await write(this.#createScreen());
+    await write(`\nLifes: ${"❤️".repeat(this.life)}`);
+    await write(`${"🩶".repeat(5 - this.life)}\n`);
+  }
+
+  async setCursor(mouseX, mouseY) {
+    const y = Math.floor(mouseY / 2) - 1;
+    const x = Math.floor((mouseX - 1) / 4);
+    const isNotApproved = !this.approvedCells.has(`${y}-${x}`);
+    const isValidPosition = isNotApproved && y <= 8 && x <= 8;
+
+    if (isValidPosition) {
+      await moveCursor(mouseX, mouseY);
+      this.cursor = { y, x };
     }
   }
 
-  await avengersEndGame(solvedPuzzle, chances, "HAR GYA BHAI");
-};
+  async #clearScreen() {
+    await write("\x1b[2J");
+  }
+
+  #RED = "\x1b[31m";
+  #GREEN = "\x1b[32m";
+
+  async handleValue(value) {
+    let color;
+    if (this.#isValid(value)) {
+      color = this.#GREEN;
+      this.approvedCells.add(`${this.cursor.y}-${this.cursor.x}`);
+    } else {
+      color = this.#RED;
+      this.life--;
+    }
+
+    this.#writeToPuzzle(color, value);
+    this.cursor = null;
+    await this.#clearScreen();
+    await this.display();
+  }
+
+  isPuzzleComplete() {
+    const plainPuzzle = this.puzzle.map((row) =>
+      row.map((cell) => stripAnsiCode(cell))
+    );
+
+    return plainPuzzle.toString() === this.solvedPuzzle.toString();
+  }
+
+  async endGame(msg) {
+    await moveCursor(0, 0);
+    await this.#clearScreen();
+    await this.display();
+    await write(`\n${msg}`);
+    await disableMouse();
+  }
+
+  status() {
+    if (this.life <= 0) return { isGameEnded: true, message: "LOST\n" };
+    if (this.isPuzzleComplete()) return { isGameEnded: true, message: "WON\n" };
+    return { isGameEnded: false };
+  }
+}

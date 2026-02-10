@@ -1,6 +1,6 @@
 import { generatePuzzle } from "./src/generator.js";
 import { createPuzzle } from "./src/puzzle.js";
-import { play } from "./src/game.js";
+import { play } from "./src/play.js";
 import { setup } from "./src/setup.js";
 
 const main = async () => {
