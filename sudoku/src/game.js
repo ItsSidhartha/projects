@@ -6,7 +6,7 @@ export class Game {
   constructor(puzzle, solvedPuzzle, preFills) {
     this.puzzle = puzzle;
     this.solvedPuzzle = solvedPuzzle;
-    this.approvedCells = new Set(preFills);
+    this.approvedCells = preFills;
     this.cursor = null;
     this.life = 5;
   }

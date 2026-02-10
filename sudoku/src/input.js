@@ -1,3 +1,5 @@
+import { disableMouse } from "./setup.js";
+
 const decode = (bytes) => new TextDecoder().decode(bytes);
 
 const handleMouseEvent = (matched) => {
@@ -10,8 +12,12 @@ const handleMouseEvent = (matched) => {
   return { isMouse: false, isValue: false };
 };
 
-const parseChunk = (chunk) => {
+const parseChunk = async (chunk) => {
   const data = decode(chunk);
+  if (data === "\x03") {
+    await disableMouse();
+    Deno.exit(1);
+  }
   // deno-lint-ignore no-control-regex
   const matched = data.match(/\x1b\[<(\d+);(\d+);(\d+)([mM])/);
 
@@ -20,11 +26,12 @@ const parseChunk = (chunk) => {
   const value = Number(data.trim());
 
   if (value) return { isValue: true, isMouse: false, value };
+
   return { isValue: false, isMouse: false };
 };
 
 export const readInput = async () => {
   const buffer = new Uint8Array(100);
   const n = await Deno.stdin.read(buffer);
-  return parseChunk(buffer.slice(0, n));
+  return await parseChunk(buffer.slice(0, n));
 };
