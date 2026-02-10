@@ -26,56 +26,45 @@ const parseChunk = (chunk) => {
 };
 
 const getPosition = async (mouseX, mouseY, cursor, preFills) => {
-  const y = Math.floor(mouseY / 2) - 1; //Math.floor((+mouseY / 2) - 1);
+  const y = Math.floor(mouseY / 2) - 1;
   const x = Math.floor((mouseX - 1) / 4);
-  if (y > 8 || x > 8 || preFills.includes(`${y}-${x}`)) return cursor;
+  const isInvalidPosition = y > 8 || x > 8 || preFills.includes(`${y}-${x}`);
+
+  if (isInvalidPosition) return cursor;
   await moveCursor(mouseX, mouseY);
   return { y, x };
 };
 
-export const game = async (puzzle, solvedPuzzle, preFills) => {
-  let chances = 5;
-  const buffer = new Uint8Array(100);
-  console.clear();
+const isPuzzleComplete = (puzzle, solvedPuzzle) => {
+  const plainPuzzle = puzzle.map((row) =>
+    row.map((cell) => stripAnsiCode(cell))
+  );
 
-  let cursor = { x: 0, y: 0 };
-  display(puzzle, chances);
+  return plainPuzzle.toString() === solvedPuzzle.toString();
+};
 
-  while (chances > 0) {
-    const n = await Deno.stdin.read(buffer);
-    const { isMouse, mouseX, mouseY, isValue, value } = parseChunk(
-      buffer.slice(0, n),
-    );
+const writeToPuzzle = (puzzle, cursor, colorCode) => {
+  puzzle[cursor.y][cursor.x] = colorCode + value + "\x1b[0m";
+};
 
-    if (isMouse) {
-      cursor = await getPosition(mouseX, mouseY, cursor, preFills);
-      continue;
-    }
-
-    if (isValue && cursor) {
-      const isValid = validate(cursor, value, solvedPuzzle);
-      if (isValid) {
-        puzzle[cursor.y][cursor.x] = "\x1b[32m" + value + "\x1b[0m";
-      } else {
-        puzzle[cursor.y][cursor.x] = "\x1b[31m" + value + "\x1b[0m";
-        chances--;
-      }
-
-      console.clear();
-      display(puzzle, chances);
-      cursor = null;
-    }
-
-    if (
-      puzzle.map((row) => row.map((cell) => stripAnsiCode(cell))).toString() ===
-        solvedPuzzle.toString()
-    ) {
-      await avengersEndGame(puzzle, chances, "JEET GYA BHAI");
-      return;
-    }
+const handleValue = (puzzle, solvedPuzzle, cursor, value, chances) => {
+  const isValid = validate(cursor, value, solvedPuzzle);
+  if (isValid) {
+    writeToPuzzle(puzzle, cursor, "\x1b[32m");
+  } else {
+    writeToPuzzle(puzzle, cursor, "\x1b[31m");
+    chances--;
   }
 
-  await avengersEndGame(solvedPuzzle, chances, "HAR GYA BHAI");
+  console.clear();
+  display(puzzle, chances);
+  cursor = null;
+};
+
+const readInput = async () => {
+  const buffer = new Uint8Array(100);
+  const n = await Deno.stdin.read(buffer);
+  return parseChunk(buffer.slice(0, n));
 };
 
 const avengersEndGame = async (puzzle, chances, msg) => {
@@ -84,4 +73,32 @@ const avengersEndGame = async (puzzle, chances, msg) => {
   await display(puzzle, chances);
   console.log(msg);
   await disableMouse();
+};
+
+export const play = async (puzzle, solvedPuzzle, preFills) => {
+  let chances = 5;
+  console.clear();
+
+  let cursor = { x: 0, y: 0 };
+  display(puzzle, chances);
+
+  while (chances > 0) {
+    const { isMouse, isValue, mouseX, mouseY, value } = await readInput();
+
+    if (isMouse) {
+      cursor = await getPosition(mouseX, mouseY, cursor, preFills);
+      continue;
+    }
+
+    if (isValue && cursor) {
+      handleValue(puzzle, solvedPuzzle, cursor, value, chances);
+    }
+
+    if (isPuzzleComplete(puzzle, solvedPuzzle)) {
+      await avengersEndGame(puzzle, chances, "JEET GYA BHAI");
+      return;
+    }
+  }
+
+  await avengersEndGame(solvedPuzzle, chances, "HAR GYA BHAI");
 };

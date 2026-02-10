@@ -1,18 +1,13 @@
 import { generatePuzzle } from "./src/generator.js";
 import { createPuzzle } from "./src/puzzle.js";
-import { game } from "./src/game.js";
-import { enableMouse, setraw } from "./src/setup.js";
+import { play } from "./src/game.js";
+import { setup } from "./src/setup.js";
 
 const main = async () => {
+  await setup();
   const solvedPuzzle = createPuzzle();
-  console.log("ho gya hai");
   const [puzzle, preFills] = generatePuzzle(solvedPuzzle);
-
-  await setraw();
-  enableMouse();
-  // takeInput();
-
-  game(puzzle, solvedPuzzle, preFills);
+  await play(puzzle, solvedPuzzle, preFills);
 };
 
-main();
+await main();

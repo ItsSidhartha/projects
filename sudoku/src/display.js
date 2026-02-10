@@ -35,4 +35,3 @@ export const display = async (puzzle, chances) => {
   console.log(screen);
   console.log("Lifes: ", "❤️".repeat(chances) + "🩶".repeat(5 - chances));
 };
-//
