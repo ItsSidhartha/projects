@@ -1,6 +1,7 @@
 import { clearScreen, moveCursor, write } from "./helpers.js";
 import { disableMouse } from "./setup.js";
 import { stripAnsiCode } from "@std/fmt/colors";
+import { getTime } from "./timer.js";
 
 export class Game {
   constructor(puzzle, solvedPuzzle, preFills) {
@@ -9,6 +10,8 @@ export class Game {
     this.approvedCells = preFills;
     this.cursor = null;
     this.life = 5;
+    this.isGameEnded = false;
+    this.startTime = Date.now();
   }
 
   #isValid(value) {
@@ -19,27 +22,27 @@ export class Game {
     this.puzzle[this.cursor.y][this.cursor.x] = colorCode + value + "\x1b[0m";
   }
 
-  #horizontal = "┠━━━┿━━━┿━━━╋━━━┿━━━┿━━━╋━━━┿━━━┿━━━┨";
-  #top = "┏━━━┯━━━┯━━━┳━━━┯━━━┯━━━┳━━━┯━━━┯━━━┓";
-  #middle = "┠───┼───┼───╋───┼───┼───╋───┼───┼───┨";
-  #bottom = "┗━━━┷━━━┷━━━┻━━━┷━━━┷━━━┻━━━┷━━━┷━━━┛";
+  #horizontal = "\x1b[33m┠━━━┿━━━┿━━━╋━━━┿━━━┿━━━╋━━━┿━━━┿━━━┨\x1b[0m";
+  #top = "\x1b[33m┏━━━┯━━━┯━━━┳━━━┯━━━┯━━━┳━━━┯━━━┯━━━┓\x1b[0m";
+  #middle =
+    "\x1b[33m┠\x1b[0m───┼───┼───\x1b[33m╋\x1b[0m───┼───┼───\x1b[33m╋\x1b[0m───┼───┼───\x1b[33m┨\x1b[0m";
+  #bottom = "\x1b[33m┗━━━┷━━━┷━━━┻━━━┷━━━┷━━━┻━━━┷━━━┷━━━┛\x1b[0m";
 
   #createScreen() {
     let screen = `${this.#top}\n`;
-
     for (let row = 0; row < 9; row++) {
       for (let colm = 0; colm < 9; colm++) {
-        if (colm % 3 === 0) screen += "┃";
-        else screen += "│";
-        screen += ` ${this.puzzle[row][colm]} `;
+        if (colm % 3 === 0) screen += "\x1b[33m┃\x1b[0m";
+        else screen += `│`;
+        screen += ` ${this.puzzle[row][colm]}\x1b[0m `;
       }
 
       if ((row + 1) % 3 === 0 && row !== 8) {
-        screen += "┃\n" + this.#horizontal + "\n";
-      } else if (row !== 8) screen += `┃\n${this.#middle}\n`;
+        screen += "\x1b[33m┃\x1b[0m\n" + this.#horizontal + "\n";
+      } else if (row !== 8) screen += `\x1b[33m┃\x1b[0m\n${this.#middle}\n`;
     }
 
-    return screen + "┃\n" + this.#bottom;
+    return screen + "\x1b[33m┃\x1b[0m\n" + this.#bottom;
   }
 
   async display() {
@@ -56,10 +59,11 @@ export class Game {
     const isValidPosition = isNotApproved && y <= 8 && x <= 8;
 
     if (isValidPosition) {
-      await moveCursor(mouseX, mouseY);
       this.cursor = { y, x };
+      await this.display();
+      await moveCursor(mouseX, mouseY);
     }
-  } 
+  }
 
   #RED = "\x1b[31m";
   #GREEN = "\x1b[32m";
@@ -76,6 +80,12 @@ export class Game {
 
     this.#writeToPuzzle(color, value);
     this.cursor = null;
+    await clearScreen();
+    await this.display();
+  }
+
+  async clearValue() {
+    this.puzzle[this.cursor.y][this.cursor.x] = " ";
     await clearScreen();
     await this.display();
   }
@@ -97,8 +107,20 @@ export class Game {
   }
 
   status() {
-    if (this.life <= 0) return { isGameEnded: true, message: "LOST\n" };
-    if (this.isPuzzleComplete()) return { isGameEnded: true, message: "WON\n" };
-    return { isGameEnded: false };
+    const timeTaken = getTime(this.startTime);
+    if (this.life <= 0) {
+      this.isGameEnded = true;
+      return {
+        message: `LOST\nTime Taken -> ${timeTaken.min} : ${timeTaken.sec}\n`,
+      };
+    }
+
+    if (this.isPuzzleComplete()) {
+      this.isGameEnded = true;
+      return {
+        message: `WON\nTime Taken -> ${timeTaken.min} : ${timeTaken.sec}\n`,
+      };
+    }
+    return {message : "In progress"};
   }
 }

@@ -5,14 +5,21 @@ const handleMouseEvent = (matched) => {
   const [, btn, mouseX, mouseY, type] = matched;
   const isButtonClicked = btn === "0" && type === "M";
   if (isButtonClicked) {
-    return { isMouse: true, isValue: false, btn, mouseX, mouseY, type };
+    return { isMouse: true, data: { btn, mouseX, mouseY, type } };
   }
 
-  return { isMouse: false, isValue: false };
+  return { isMouse: false };
 };
 
 const parseChunk = async (chunk) => {
   const data = decode(chunk);
+  const outputConfig = {
+    isMouse: false,
+    isValue: false,
+    isBackSpace: false,
+    data: {},
+  };
+
   if (data === "\x03") {
     await disableMouse();
     Deno.exit(1);
@@ -22,11 +29,16 @@ const parseChunk = async (chunk) => {
 
   if (matched) return handleMouseEvent(matched);
 
+  outputConfig.isBackSpace = data.trim() === "\x7f";
+
   const value = Number(data.trim());
 
-  if (value) return { isValue: true, isMouse: false, value };
+  if (value) {
+    outputConfig.isValue = true;
+    outputConfig.data.value = value;
+  }
 
-  return { isValue: false, isMouse: false };
+  return outputConfig;
 };
 
 export const readInput = async () => {

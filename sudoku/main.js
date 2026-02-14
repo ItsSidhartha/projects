@@ -4,10 +4,10 @@ import { play } from "./src/play.js";
 import { setup } from "./src/setup.js";
 
 const main = async () => {
-  await setup();
   const solvedPuzzle = createPuzzle();
-
   const [puzzle, preFills] = generatePuzzle(solvedPuzzle);
+  
+  await setup();
   await play(puzzle, solvedPuzzle, preFills);
 };
 
