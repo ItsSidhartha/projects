@@ -1,4 +1,4 @@
-import { moveCursor, write } from "./helpers.js";
+import { clearScreen, moveCursor, write } from "./helpers.js";
 import { disableMouse } from "./setup.js";
 import { stripAnsiCode } from "@std/fmt/colors";
 
@@ -59,11 +59,7 @@ export class Game {
       await moveCursor(mouseX, mouseY);
       this.cursor = { y, x };
     }
-  }
-
-  async #clearScreen() {
-    await write("\x1b[2J");
-  }
+  } 
 
   #RED = "\x1b[31m";
   #GREEN = "\x1b[32m";
@@ -80,7 +76,7 @@ export class Game {
 
     this.#writeToPuzzle(color, value);
     this.cursor = null;
-    await this.#clearScreen();
+    await clearScreen();
     await this.display();
   }
 
@@ -94,7 +90,7 @@ export class Game {
 
   async endGame(msg) {
     await moveCursor(0, 0);
-    await this.#clearScreen();
+    await clearScreen();
     await this.display();
     await write(`\n${msg}`);
     await disableMouse();

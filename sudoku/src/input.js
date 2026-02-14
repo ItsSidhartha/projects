@@ -1,6 +1,5 @@
+import { decode } from "./helpers.js";
 import { disableMouse } from "./setup.js";
-
-const decode = (bytes) => new TextDecoder().decode(bytes);
 
 const handleMouseEvent = (matched) => {
   const [, btn, mouseX, mouseY, type] = matched;

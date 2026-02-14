@@ -1,9 +1,9 @@
 import { Game } from "./game.js";
-import { write } from "./helpers.js";
+import { clearScreen } from "./helpers.js";
 import { readInput } from "./input.js";
 
 export const play = async (puzzle, solvedPuzzle, preFills) => {
-  await write("\x1B[2J");
+  await clearScreen();
   const game = new Game(puzzle, solvedPuzzle, preFills);
   await game.display();
 
