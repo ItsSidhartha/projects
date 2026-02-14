@@ -6,7 +6,7 @@ export const generatePuzzle = (solvedPuzzle) => {
     puzzle.push([]);
     for (let colm = 0; colm < 9; colm++) {
       const predictor = Math.random();
-      if (predictor < 0.35) {
+      if (predictor < 0.40) {
         preFills.add(`${row}-${colm}`);
         puzzle[row][colm] = "\x1b[37m" + solvedPuzzle[row][colm] + "\x1b[0m";
       } else {

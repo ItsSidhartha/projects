@@ -6,6 +6,8 @@ import { setup } from "./src/setup.js";
 const main = async () => {
   await setup();
   const solvedPuzzle = createPuzzle();
+  // console.log({ solvedPuzzle });
+
   const [puzzle, preFills] = generatePuzzle(solvedPuzzle);
   await play(puzzle, solvedPuzzle, preFills);
 };

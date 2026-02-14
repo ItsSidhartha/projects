@@ -1,13 +1,8 @@
 const createDomain = () => {
-  const domain = [];
-  for (let row = 0; row < 9; row++) {
-    domain.push([]);
-    for (let colm = 0; colm < 9; colm++) {
-      domain[row][colm] = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-    }
-  }
-
-  return [...domain];
+  return Array.from(
+    { length: 9 },
+    () => Array.from({ length: 9 }, () => [1, 2, 3, 4, 5, 6, 7, 8, 9]),
+  );
 };
 
 const createBoxCordinate = (y, x) => {
@@ -46,22 +41,19 @@ const createPadosiCordinates = (y, x) => {
 
 const domainLog = [];
 
-const spliceFromPadosi = (y, x, num, domain, _grid) => {
+const spliceFromPadosi = (y, x, num, domain, grid) => {
   const padosi = createPadosiCordinates(y, x);
   padosi.forEach((p) => {
-    // if (domain[p.y][p.x].has(num) && domain[p.y][p.x].size === 1) {
-    //   domainLog.pop();
-    //   domain = domainLog.at(-1);
-    //   return;
-    // }
-    const index = domain[p.y][p.x].findLastIndex((x) => x === num);
+    const padosiDomain = domain[p.y][p.x];
+    const index = padosiDomain.findLastIndex((x) => x === num);
     if (index !== -1) {
-      domain[p.y][p.x].splice(index, 1);
+      padosiDomain.splice(index, 1);
     }
-    if (domain[p.y][p.x].size === 1) {
-      const [remaining] = [...domain[p.y][p.x]];
-      _grid[p.y][p.x] = remaining;
-      spliceFromPadosi(p.y, p.x, remaining, domain, _grid);
+
+    if (padosiDomain.size === 1) {
+      const [remaining] = [...padosiDomain];
+      grid[p.y][p.x] = remaining;
+      spliceFromPadosi(p.y, p.x, remaining, domain, grid);
     }
   });
 };
@@ -71,45 +63,48 @@ const pickNumber = (set) => {
   return set[index];
 };
 
-const initPuzzle = (domain) => {
-  let grid = Array.from(
-    { length: 9 },
-    () => Array.from({ length: 9 }, () => ""),
+const createGrid = (row, colm) => {
+  return Array.from(
+    { length: row },
+    () => Array.from({ length: colm }, () => ""),
   );
+};
+
+const saveState = (domain, row, colm) => {
+  domainLog.push({
+    domain: domain.map((x) => x.map((y) => [...y])),
+    row,
+    colm,
+  });
+};
+
+const backTrack = (domain, colm, row) => {
+  const index = domainLog.findLastIndex((x) => {
+    return x["domain"][row][colm].length > 1;
+  });
+
+  domainLog.splice(index, domainLog.length - index);
+
+  domain = domainLog.at(-1)["domain"];
+  colm = domainLog.at(-1).colm - 1;
+  row = domainLog.at(-1).row;
+  return { domain, colm, row };
+};
+
+const initPuzzle = (domain) => {
+  const grid = createGrid(9, 9);
 
   for (let row = 0; row < 9; row++) {
     for (let colm = 0; colm < 9; colm++) {
-      domainLog.push({
-        domain: domain.map((x) => x.map((y) => [...y])),
-        grid: [...grid.map((x) => [...x])],
-        row,
-        colm,
-      });
+      saveState([...domain], row, colm);
       const number = pickNumber(domain[row][colm]);
-      if (!number) {
-        // console.log("...................................................");
-        // console.log(row, colm);
-
-        const index = domainLog.findLastIndex((x) => {
-          return x["domain"][row][colm].length > 1;
-        });
-
-        domainLog.splice(index, domainLog.length - index);
-
-        row = domainLog.at(-1).row;
-        colm = domainLog.at(-1).colm - 1;
-        domain = domainLog.at(-1)["domain"];
-        grid = domainLog.at(-1)["grid"];
-        // console.log(row, colm);
+      if (number) {
+        grid[row][colm] = number;
+        spliceFromPadosi(row, colm, number, domain, grid);
         continue;
       }
 
-      // console.log(row, colm);
-
-      grid[row][colm] = number;
-      spliceFromPadosi(row, colm, number, domain, grid);
-      // console.log({ row, colm, domain });
-      // prompt();
+      ({ row, colm, domain } = backTrack(domain, colm, row));
     }
   }
 
@@ -118,6 +113,5 @@ const initPuzzle = (domain) => {
 
 export const createPuzzle = () => {
   const domain = createDomain();
-  return initPuzzle([...domain]);
-  // console.log({ puzzle, domain });
+  return initPuzzle(domain);
 };
