@@ -1,6 +1,6 @@
 import { clearScreen, moveCursor, write } from "./helpers.js";
 import { disableMouse } from "./setup.js";
-import { stripAnsiCode } from "@std/fmt/colors";
+import { reset, stripAnsiCode } from "@std/fmt/colors";
 import { getTime } from "./timer.js";
 
 export class Game {
@@ -22,27 +22,34 @@ export class Game {
     this.puzzle[this.cursor.y][this.cursor.x] = colorCode + value + "\x1b[0m";
   }
 
-  #horizontal = "\x1b[33m┠━━━┿━━━┿━━━╋━━━┿━━━┿━━━╋━━━┿━━━┿━━━┨\x1b[0m";
-  #top = "\x1b[33m┏━━━┯━━━┯━━━┳━━━┯━━━┯━━━┳━━━┯━━━┯━━━┓\x1b[0m";
+  #YELLOW = "\x1b[33m";
+  #RESET = "\x1b[0m";
+
+  #horizontal =
+    `${this.#YELLOW}┠━━━┿━━━┿━━━╋━━━┿━━━┿━━━╋━━━┿━━━┿━━━┨${this.#RESET}`;
+  #top = `${this.#YELLOW}┏━━━┯━━━┯━━━┳━━━┯━━━┯━━━┳━━━┯━━━┯━━━┓${this.#RESET}`;
   #middle =
-    "\x1b[33m┠\x1b[0m───┼───┼───\x1b[33m╋\x1b[0m───┼───┼───\x1b[33m╋\x1b[0m───┼───┼───\x1b[33m┨\x1b[0m";
-  #bottom = "\x1b[33m┗━━━┷━━━┷━━━┻━━━┷━━━┷━━━┻━━━┷━━━┷━━━┛\x1b[0m";
+    `${this.#YELLOW}┠${this.#RESET}───┼───┼───${this.#YELLOW}╋${this.#RESET}───┼───┼───${this.#YELLOW}╋${this.#RESET}───┼───┼───${this.#YELLOW}┨${this.#RESET}`;
+  #bottom =
+    `${this.#YELLOW}┗━━━┷━━━┷━━━┻━━━┷━━━┷━━━┻━━━┷━━━┷━━━┛${this.#RESET}`;
 
   #createScreen() {
     let screen = `${this.#top}\n`;
     for (let row = 0; row < 9; row++) {
       for (let colm = 0; colm < 9; colm++) {
-        if (colm % 3 === 0) screen += "\x1b[33m┃\x1b[0m";
+        if (colm % 3 === 0) screen += `${this.#YELLOW}┃${this.#RESET}`;
         else screen += `│`;
-        screen += ` ${this.puzzle[row][colm]}\x1b[0m `;
+        screen += ` ${this.puzzle[row][colm]}${this.#RESET} `;
       }
 
       if ((row + 1) % 3 === 0 && row !== 8) {
-        screen += "\x1b[33m┃\x1b[0m\n" + this.#horizontal + "\n";
-      } else if (row !== 8) screen += `\x1b[33m┃\x1b[0m\n${this.#middle}\n`;
+        screen += `${this.#YELLOW}┃${this.#RESET}\n` + this.#horizontal + `\n`;
+      } else if (row !== 8) {
+        screen += `${this.#YELLOW}┃${this.#RESET}\n${this.#middle}\n`;
+      }
     }
 
-    return screen + "\x1b[33m┃\x1b[0m\n" + this.#bottom;
+    return screen + `${this.#YELLOW}┃${this.#RESET}\n` + this.#bottom;
   }
 
   async display() {
@@ -121,6 +128,6 @@ export class Game {
         message: `WON\nTime Taken -> ${timeTaken.min} : ${timeTaken.sec}\n`,
       };
     }
-    return {message : "In progress"};
+    return { message: "In progress" };
   }
 }
