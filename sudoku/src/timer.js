@@ -20,5 +20,5 @@ export const setIntervalForTimer = (game) => {
   const intervalId = setInterval(() => {
     if (game.isGameEnded) return clearInterval(intervalId);
     showTimer(game.startTime);
-  }, 1000);
+  }, 100);
 };

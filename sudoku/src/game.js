@@ -1,6 +1,6 @@
 import { clearScreen, moveCursor, write } from "./helpers.js";
 import { disableMouse } from "./setup.js";
-import { reset, stripAnsiCode } from "@std/fmt/colors";
+import { stripAnsiCode } from "@std/fmt/colors";
 import { getTime } from "./timer.js";
 
 export class Game {
