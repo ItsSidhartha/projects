@@ -1,4 +1,4 @@
-package com.freedom.model;
+package com.freedom.model.coord;
 
 public enum Row {
     ONE(1), TWO(2), THREE(3), FOUR(4),

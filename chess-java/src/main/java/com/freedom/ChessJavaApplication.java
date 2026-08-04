@@ -1,5 +1,6 @@
 package com.freedom;
 
+import com.freedom.service.GameService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -16,7 +17,7 @@ public class ChessJavaApplication {
     static class ChessCommandLineRunner implements CommandLineRunner {
         @Override
         public void run(String... args) {
-            System.out.println("Chess CLI started.");
+            GameService.play();
         }
     }
 }
