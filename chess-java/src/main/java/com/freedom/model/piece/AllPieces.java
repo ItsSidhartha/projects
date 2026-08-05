@@ -1,5 +1,7 @@
 package com.freedom.model.piece;
 
+import com.freedom.model.coord.Position;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,5 +22,9 @@ public class AllPieces {
         List<Piece> combined = new ArrayList<>(white);
         combined.addAll(black);
         return combined;
+    }
+
+    public void capture(Position position) {
+        all().removeIf(piece -> piece.isAt(position));
     }
 }

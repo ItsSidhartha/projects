@@ -47,4 +47,11 @@ public class PathValidator {
         }
         return between;
     }
+
+    public static boolean isCapturing(Position to, Pieces pieces) {
+        for (Piece piece : pieces) {
+            if(piece.isAt(to)) return true;
+        }
+        return false;
+    }
 }

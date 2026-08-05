@@ -2,6 +2,7 @@ package com.freedom.model.piece;
 
 import com.freedom.model.coord.Offset;
 import com.freedom.model.coord.Position;
+import com.freedom.model.coord.Row;
 
 import java.util.List;
 
@@ -28,6 +29,11 @@ public class Pawn implements Piece {
     @Override
     public List<Position> possibleMove() {
         Offset forward = color == Color.WHITE ? Offset.UP : Offset.DOWN;
+        Row row = color == Color.WHITE ? Row.TWO : Row.SEVEN;
+        if (position.isAtRow(row)) {
+            List<Offset> offsets = color == Color.WHITE ? Offset.PAWN_DOUBLE_UP : Offset.PAWN_DOUBLE_DOWN;
+            return MoveGeometry.offsets(position, offsets);
+        }
         return MoveGeometry.offsets(position, List.of(forward));
     }
 

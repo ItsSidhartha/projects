@@ -15,10 +15,9 @@ public class GameService {
             System.out.println("Enter Move : ");
             String rawMove = scanner.next();
 
-            Move move = null;
-
+            Move move;
             try {
-                move = Validator.validate(rawMove);
+                move = Parser.parse(rawMove);
             } catch (InvalidInputException e) {
                 System.out.println(e.getMessage());
                 continue;
@@ -28,7 +27,6 @@ public class GameService {
                 game.move(move);
             } catch (InvalidInputException e) {
                 System.out.println(e.getMessage());
-                System.out.println("Enter Move : ");
             }
         }
     }

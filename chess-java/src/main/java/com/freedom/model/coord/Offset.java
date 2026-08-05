@@ -12,6 +12,9 @@ public record Offset(int colDelta, int rowDelta) {
     public static final Offset DOWN_LEFT = new Offset(-1, -1);
     public static final Offset DOWN_RIGHT = new Offset(1, -1);
 
+    public static final List<Offset> PAWN_DOUBLE_UP = List.of(UP, new Offset(0, 2));
+    public static final List<Offset> PAWN_DOUBLE_DOWN = List.of(DOWN, new Offset(0, -2));
+
     public static final List<Offset> ORTHOGONAL = List.of(UP, DOWN, LEFT, RIGHT);
     public static final List<Offset> DIAGONAL = List.of(UP_LEFT, UP_RIGHT, DOWN_LEFT, DOWN_RIGHT);
     public static final List<Offset> ALL_DIRECTIONS =

@@ -7,4 +7,8 @@ public record Position(Col col, Row row ) {
         return Col.fromOrdinal(colOrdinal)
                 .flatMap(c -> Row.fromOrdinal(rowOrdinal).map(r -> new Position(c, r)));
     }
+
+    public boolean isAtRow(Row row) {
+        return this.row.equals(row);
+    }
 }
