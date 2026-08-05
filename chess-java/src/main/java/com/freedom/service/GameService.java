@@ -14,11 +14,12 @@ public class GameService {
 
     private final Screen screen;
     private final Game game;
-    private final Parser parser = new LongNotationParser();
+    private final Parser parser;
 
     public GameService(Screen screen, Game game) {
         this.screen = screen;
         this.game = game;
+        this.parser = new SanNotationParser(game);
     }
 
     public void play() {
