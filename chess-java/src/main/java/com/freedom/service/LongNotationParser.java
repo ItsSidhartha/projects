@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 public class LongNotationParser implements Parser {
 
     private final Pattern MOVE_PATTERN =
-            Pattern.compile("^([KQRBN])?([a-h][1-8])x?([a-h][1-8])[+#]?$");
+            Pattern.compile("^([KQRBN])?([a-h][1-8])x?([a-h][1-8])(?:=([KQRBNP]))?[+#]?$");
 
     public Move parse(String rawMove) throws InvalidInputException {
         Matcher matcher = MOVE_PATTERN.matcher(rawMove.trim());
@@ -20,8 +20,14 @@ public class LongNotationParser implements Parser {
         PieceType pieceType = pieceTypeFor(matcher.group(1));
         Position from = parseSquare(matcher.group(2));
         Position to = parseSquare(matcher.group(3));
+        PieceType promotesTo = matcher.group(4) == null ? null : pieceTypeFor(matcher.group(4));
 
-        return new Move(pieceType, from, to);
+        if (promotesTo == PieceType.KING || promotesTo == PieceType.PAWN)
+            throw new InvalidInputException("Cannot promote to " + promotesTo + ": " + rawMove);
+        if (promotesTo != null && pieceType != PieceType.PAWN)
+            throw new InvalidInputException("Only a pawn can promote: " + rawMove);
+
+        return new Move(pieceType, from, to, promotesTo, null);
     }
 
     private PieceType pieceTypeFor(String letter) {
@@ -32,6 +38,7 @@ public class LongNotationParser implements Parser {
             case "R" -> PieceType.ROOK;
             case "B" -> PieceType.BISHOP;
             case "N" -> PieceType.KNIGHT;
+            case "P" -> PieceType.PAWN;
             default -> throw new IllegalStateException("Unreachable, constrained by regex: " + letter);
         };
     }

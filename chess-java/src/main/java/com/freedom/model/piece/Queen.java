@@ -9,6 +9,7 @@ public class Queen implements Piece {
     private Position position;
     private final Color color;
     private final PieceType type = PieceType.QUEEN;
+    private boolean hasMoved = false;
 
     public Queen(Position position, Color color) {
         this.position = position;
@@ -18,6 +19,7 @@ public class Queen implements Piece {
     @Override
     public void move(Position position) {
         this.position = position;
+        this.hasMoved = true;
     }
 
     @Override
@@ -53,5 +55,10 @@ public class Queen implements Piece {
     @Override
     public PieceType type() {
         return type;
+    }
+
+    @Override
+    public boolean hasMoved() {
+        return hasMoved;
     }
 }

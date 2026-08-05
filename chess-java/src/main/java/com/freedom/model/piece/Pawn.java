@@ -11,6 +11,7 @@ public class Pawn implements Piece {
     public Position position;
     private final Color color;
     private final PieceType type = PieceType.PAWN;
+    private boolean hasMoved = false;
 
     public Pawn(Position position, Color color) {
         this.position = position;
@@ -20,6 +21,7 @@ public class Pawn implements Piece {
     @Override
     public void move(Position position) {
         this.position = position;
+        this.hasMoved = true;
     }
 
     @Override
@@ -74,5 +76,10 @@ public class Pawn implements Piece {
     @Override
     public PieceType type() {
         return type;
+    }
+
+    @Override
+    public boolean hasMoved() {
+        return hasMoved;
     }
 }

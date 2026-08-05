@@ -14,6 +14,16 @@ public class PieceFactory {
         return initPieces(Color.BLACK, Row.EIGHT, Row.SEVEN);
     }
 
+    public static Piece create(PieceType type, Position position, Color color) {
+        return switch (type) {
+            case QUEEN -> new Queen(position, color);
+            case ROOK -> new Rook(position, color);
+            case BISHOP -> new Bishop(position, color);
+            case KNIGHT -> new Knight(position, color);
+            case PAWN, KING -> throw new IllegalArgumentException(type + " cannot be created after game start");
+        };
+    }
+
     private static Pieces initPieces(Color color, Row backRow, Row pawnRow) {
         Pieces pieces = new Pieces();
 
