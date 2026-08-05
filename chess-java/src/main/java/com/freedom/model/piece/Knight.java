@@ -2,6 +2,7 @@ package com.freedom.model.piece;
 
 import com.freedom.model.coord.Offset;
 import com.freedom.model.coord.Position;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -38,5 +39,20 @@ public class Knight implements Piece {
     @Override
     public boolean isColor(Color color) {
         return this.color == color;
+    }
+
+    @Override
+    public String symbol() {
+        return color == Color.WHITE ? "♞" : "♘";
+    }
+
+    @Override
+    public Position position() {
+        return position;
+    }
+
+    @Override
+    public PieceType type() {
+        return type;
     }
 }

@@ -39,4 +39,19 @@ public class Queen implements Piece {
     public boolean isColor(Color color) {
         return this.color == color;
     }
+
+    @Override
+    public String symbol() {
+        return color == Color.WHITE ? "♛" : "♕";
+    }
+
+    @Override
+    public Position position() {
+        return position;
+    }
+
+    @Override
+    public PieceType type() {
+        return type;
+    }
 }

@@ -54,4 +54,12 @@ public class PathValidator {
         }
         return false;
     }
+
+    public static boolean isEmpty(Position position, List<Piece> allPieces) {
+        for (Piece piece : allPieces) {
+            if (piece.isAt(position)) return false;
+        }
+        return true;
+    }
+
 }

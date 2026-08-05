@@ -25,6 +25,7 @@ public class AllPieces {
     }
 
     public void capture(Position position) {
-        all().removeIf(piece -> piece.isAt(position));
+        white.removeIf(piece -> piece.isAt(position));
+        black.removeIf(piece -> piece.isAt(position));
     }
 }

@@ -9,6 +9,10 @@ public interface Piece {
         return possibleMove().contains(position);
     }
 
+    default List<Position> attackSquares() {
+        return possibleMove();
+    }
+
     void move(Position position);
 
     boolean match(PieceType pieceType, Position from);
@@ -18,4 +22,10 @@ public interface Piece {
     boolean isAt(Position position);
 
     boolean isColor(Color color);
+    
+    String symbol();
+
+    Position position();
+
+    PieceType type();
 }

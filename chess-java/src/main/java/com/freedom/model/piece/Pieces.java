@@ -11,4 +11,18 @@ public class Pieces extends ArrayList<Piece> {
                 .findFirst()
                 .orElse(null);
     }
+
+    public Piece at(Position position) {
+        return this.stream()
+                .filter(piece -> piece.isAt(position))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public Piece king() {
+        return this.stream()
+                .filter(piece -> piece.type() == PieceType.KING)
+                .findFirst()
+                .orElse(null);
+    }
 }

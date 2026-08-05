@@ -15,9 +15,15 @@ public class ChessJavaApplication {
 
     @Component
     static class ChessCommandLineRunner implements CommandLineRunner {
+        private final GameService gameService;
+
+        ChessCommandLineRunner(GameService gameService) {
+            this.gameService = gameService;
+        }
+
         @Override
         public void run(String... args) {
-            GameService.play();
+            gameService.play();
         }
     }
 }
